@@ -60,9 +60,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
             const LPVOID BASE_HELP_BUTTON_ADDR = (LPVOID)(0x0045649C + 1);
 
-            // actually we can unlock fps XD
-            const LPVOID BASE_FPS1_ADDR = (LPVOID)(0x004EB3AB + 2);// sbyte
-            const LPVOID BASE_FPS2_ADDR = (LPVOID)(0x004EB3B4 + 2);// sbyte
+            // actually we can unlock fps XD 5905
+            const LPVOID BASE_FPS1_ADDR = (LPVOID)(0x0047B5C3);// sbyte
+            const LPVOID BASE_FPS2_ADDR = (LPVOID)(0x0047B5CC);// sbyte
 #endif
 
             int width = GetPrivateProfileIntA("GameResolution", "Width", 1024, CONFIG_FILE);
@@ -221,7 +221,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                 if (bytes_read == 0)
                     MessageBoxA(NULL, "Could not get height memory offset. 6", "ReadProcessMemory error", MB_OK);
 
-                int position = ((width - 1024) / 2) + 131;
+                int position = height - 141;
                 if (!WriteProcessMemory(hProcess, BASE_ARROW_ADDR, &position, 4, &bytes_written))
                 {
                     sprintf_s(msg, "Error writing to memory! 6 %d", GetLastError());

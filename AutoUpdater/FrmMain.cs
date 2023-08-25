@@ -1034,7 +1034,8 @@ namespace AutoUpdater
             }
             else
             {
-                LaunchSite(m_szLogoutSite);
+                //退出后打开网页
+                //LaunchSite(m_szLogoutSite);
             }
         }
 
