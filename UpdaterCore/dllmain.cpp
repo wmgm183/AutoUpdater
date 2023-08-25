@@ -43,24 +43,24 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #elif VERSION == 5187
 
 
-            const LPVOID BASE_W_ADDR = (LPVOID)(0x004EB22F + 6);
-            const LPVOID BASE_H_ADDR = (LPVOID)(0x004EB239 + 6);
-            const LPVOID BASE_W2_ADDR = (LPVOID)(0x004ED815 + 6);// new location pos=width
-            const LPVOID BASE_H2_ADDR = (LPVOID)(0x004ED81F + 6);// new location pos=height
+            const LPVOID BASE_W_ADDR = (LPVOID)(0x004EB22F + 6);//1440
+            const LPVOID BASE_H_ADDR = (LPVOID)(0x004EB239 + 6);//900
+            const LPVOID BASE_W2_ADDR = (LPVOID)(0x004ED815 + 6);// new location pos=width //1440
+            const LPVOID BASE_H2_ADDR = (LPVOID)(0x004ED81F + 6);// new location pos=height//900
 
-            const LPVOID BASE_PUZZLE_W_ADDR = (LPVOID)(0x00539C34 + 1);
-            const LPVOID BASE_PUZZLE_H_ADDR = (LPVOID)(0x00539C4B + 1);
-            const LPVOID BASE_PUZZLE_H2_ADDR = (LPVOID)(0x00539C6B + 1);
+            const LPVOID BASE_PUZZLE_W_ADDR = (LPVOID)(0x00539C34 + 1);//1440
+            const LPVOID BASE_PUZZLE_H_ADDR = (LPVOID)(0x00539C4B + 1);//900
+            const LPVOID BASE_PUZZLE_H2_ADDR = (LPVOID)(0x00539C6B + 1);//900
 
             const LPVOID BASE_MAIN_UI0_ADDR = (LPVOID)(0x004F7B8A + 1);
             const LPVOID BASE_MAIN_UI1_ADDR = (LPVOID)(0x004F7B8F + 1);
 
-            // arrow only 1 location 
+            // 只有一个位置的箭头
             const LPVOID BASE_ARROW_ADDR = (LPVOID)(0x00553B2D + 3); // int position = ((width - 1024) / 2) + 131;
 
-            const LPVOID BASE_HELP_BUTTON_ADDR = (LPVOID)(0x0045649C + 1);
+            const LPVOID BASE_HELP_BUTTON_ADDR = (LPVOID)(0x0045649C + 1);//
 
-            // actually we can unlock fps XD 5905
+            // 解锁帧率 fps
             const LPVOID BASE_FPS1_ADDR = (LPVOID)(0x0047B5C3);// sbyte
             const LPVOID BASE_FPS2_ADDR = (LPVOID)(0x0047B5CC);// sbyte
 #endif
@@ -160,7 +160,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                 int position = height - 141;
                 if (!WriteProcessMemory(hProcess, BASE_MAIN_UI0_ADDR, &position, 4, &bytes_written))
                 {
-                    sprintf_s(msg, "Error writing to memory! 6 %d", GetLastError());
+                    sprintf_s(msg, "Error writing to memory! 6a %d", GetLastError());
                     MessageBoxA(NULL, msg, "WriteProcessMemory error", MB_OK);
                 }
             }
@@ -221,12 +221,18 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                 if (bytes_read == 0)
                     MessageBoxA(NULL, "Could not get height memory offset. 6", "ReadProcessMemory error", MB_OK);
 
+
+
+
                 int position = height - 141;
-                if (!WriteProcessMemory(hProcess, BASE_ARROW_ADDR, &position, 4, &bytes_written))
+                if (!WriteProcessMemory(hProcess, BASE_MAIN_UI0_ADDR, &position, 4, &bytes_written))
                 {
-                    sprintf_s(msg, "Error writing to memory! 6 %d", GetLastError());
+                    sprintf_s(msg, "Error writing to memory! 6bb %d", GetLastError());
                     MessageBoxA(NULL, msg, "WriteProcessMemory error", MB_OK);
                 }
+
+
+
             }
 #endif
 
@@ -286,8 +292,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                 }
             }
 
-            CFlashFix flash;
-            flash.Hook();
+
         }
         break;
     }

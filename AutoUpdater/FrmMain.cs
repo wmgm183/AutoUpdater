@@ -377,7 +377,7 @@ namespace AutoUpdater
             m_swStopwatch.Start();
             m_wcClient = new WebClient();
             m_wcClient.DownloadProgressChanged += DownloadFileProgressChanged;
-            m_wcClient.DownloadFileCompleted += ClientOnDownloadFileCompleted;
+            m_wcClient.DownloadFileCompleted += ClientOnDownloadFileCompleted;//下载后的逻辑处理
             m_wcClient.DownloadFileAsync(new Uri(download), GetTempDownloadPath(fileName));
         }
 
@@ -416,16 +416,8 @@ namespace AutoUpdater
                 string[] parsed = fullPath.Split('/');
                 string fileName = parsed[parsed.Length - 1];
                 string tempName = fileName.Replace(".exe", "");
-                if (int.TryParse(tempName, out int idPatch) && idPatch > 10000)
-                {
-                    m_szOpenAfterClose = GetTempDownloadPath(fileName);
-                    m_bInternalCloseRequest = true;
-                    Close();
-                    return;
-                }
 
-                Edit(lblCenterStatus, LabelAsyncOperation.Text,
-                    LanguageManager.GetString("StrInstallingUpdates", fileName));
+                Edit(lblCenterStatus, LabelAsyncOperation.Text, LanguageManager.GetString("StrInstallingUpdates", fileName));
 
                 if (string.IsNullOrEmpty(Path.GetExtension(fileName)))
                     fileName += ".exe";
@@ -440,8 +432,8 @@ namespace AutoUpdater
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(this, @$"Não foi possível instalar o patch {fileName}. Por favor baixe o arquivo manualmente no site!\r\nErro: {ex.Message}", 
-                        @"Falha na instalação");
+                    MessageBox.Show(this, @$"无法安装补丁{fileName}请在网站上手动下载文件!\r\nErro: {ex.Message}",
+                        @"安装失败");
                     break;
                 }
 
@@ -527,13 +519,13 @@ namespace AutoUpdater
                 switch (op)
                 {
                     case ProgressBarAsyncOperation.Value:
-                        control.Value = (int) ((long) value);
+                        control.Value = Convert.ToInt32(value);
                         break;
                     case ProgressBarAsyncOperation.Min:
-                        control.Minimum = (int) ((long) value);
+                        control.Minimum = Convert.ToInt32(value);
                         break;
                     case ProgressBarAsyncOperation.Max:
-                        control.Maximum = (int) ((long) value);
+                        control.Maximum = Convert.ToInt32(value);
                         break;
                 }
             }
@@ -598,11 +590,46 @@ namespace AutoUpdater
 
         private void FrmMain_Load(object sender, EventArgs e)
         {
+            Shubiao();
             DeleteTempFolder();
             LoadVersion();
             ConnectToAutoUpdateServer();
         }
+        private bool isDragging = false;
+        private int mouseX, mouseY;
+        private void Shubiao()
+        {
+            // 鼠标按下事件处理程序
+            this.MouseDown += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    isDragging = true;
+                    mouseX = e.X;
+                    mouseY = e.Y;
+                }
+            };
 
+            // 鼠标移动事件处理程序
+            this.MouseMove += (sender, e) =>
+            {
+                if (isDragging)
+                {
+                    this.Left += e.X - mouseX;
+                    this.Top += e.Y - mouseY;
+                }
+            };
+
+            // 鼠标释放事件处理程序
+            this.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    isDragging = false;
+                }
+            };
+
+        }
         #region Mouse Hover Buttons
 
         private void btnRegister_MouseEnter(object sender, EventArgs e)
@@ -724,24 +751,28 @@ namespace AutoUpdater
 
         public bool RemoteFileExists(string url)
         {
-            HttpWebResponse response = null;
-            var request = (HttpWebRequest) WebRequest.Create(url);
-            request.Method = "HEAD";
-            request.UserAgent = "World-Conquer-Online-Auto-Patcher";
             try
             {
-                response = (HttpWebResponse) request.GetResponse();
-                return true;
+                var request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "HEAD";
+                request.UserAgent = "World-Conquer-Online-Auto-Patcher";
+
+                using (var response = (HttpWebResponse)request.GetResponse())
+                {
+                    return response.StatusCode == HttpStatusCode.OK;
+                }
             }
-            catch (WebException)
+            catch (WebException ex)
             {
-                /* A WebException will be thrown if the status of the response is not `200 OK` */
-                return false;
-            }
-            finally
-            {
-                // Don't forget to close your response.
-                response?.Close();
+                if (ex.Response is HttpWebResponse webResponse)
+                {
+                    return webResponse.StatusCode == HttpStatusCode.OK;
+                }
+                else
+                {
+                    // 处理其他类型的 WebException 异常
+                    return false;
+                }
             }
         }
 
@@ -1034,7 +1065,6 @@ namespace AutoUpdater
             }
             else
             {
-                //退出后打开网页
                 //LaunchSite(m_szLogoutSite);
             }
         }
@@ -1046,12 +1076,15 @@ namespace AutoUpdater
         private async Task PlayAsync()
         {
             const string fileName = "Conquer.exe";
-            const string injectDll = "UpdaterCore.dll";
+            //const string injectDll = "UpdaterCore.dll";
+            const string HookDll = "OpenConquerHook.dll";
+            
             string[] filesToCheck =
             {
                 fileName,
 #if !NO_INJECTION
-                injectDll,
+                //injectDll,
+                HookDll,
 #endif
             };
             
@@ -1087,8 +1120,8 @@ namespace AutoUpdater
             };
 
             game.Start();
-            Injector.StartInjection(injectDll, (uint) game.Id);
-
+            //Injector.StartInjection(injectDll, (uint) game.Id);
+            Injector.StartInjection(HookDll, (uint)game.Id);
             m_lOpenClients.Add(game);
         }
 

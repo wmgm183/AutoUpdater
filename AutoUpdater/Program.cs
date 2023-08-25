@@ -42,7 +42,7 @@ namespace AutoUpdater
                 if (appSingleton.WaitOne(0, false))
                 {
 #else
-                    Environment.CurrentDirectory = @"D:\World Conquer\Client";
+                    Environment.CurrentDirectory = @"E:\conquer\zf3613";
 #endif
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
